@@ -23,7 +23,6 @@ permissions:
   packages: write
   id-token: write
   attestations: write
-  actions: write
 
 jobs:
   release:
