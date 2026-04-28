@@ -1,0 +1,24 @@
+# file: .github/workflows/security.yml
+# version: 1.0.0
+# guid: c0c4ce12-0000-4000-8000-000000000001
+
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'  # Mondays 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  security:
+    uses: jdfalk/ghcommon/.github/workflows/reusable-security.yml@main
+    secrets: inherit

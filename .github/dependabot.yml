@@ -1,0 +1,9 @@
+# file: .github/dependabot.yml
+# version: 1.0.0
+# guid: abcdabcd-abcd-4abc-8abc-abcdabcdabcd
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

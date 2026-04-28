@@ -1,0 +1,17 @@
+# file: .github/workflow-config.yaml
+# version: 1.0.0
+# guid: c0fc0f1f-0000-4000-8000-000000000001
+#
+# Per-repo knobs for the reusable workflows in jdfalk/ghcommon. Toggle features
+# off here when a repo doesn't need them rather than forking the reusables.
+
+build:
+  go_versions: ['1.25']
+  python_versions: ['3.13']
+  node_versions: ['22']
+  platforms: ['linux/amd64', 'linux/arm64']
+  enable_protobuf: false
+  enable_docker: false
+  enable_cross_compile: false
+  enable_coverage: false
+  enable_security_scan: true

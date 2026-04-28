@@ -1,0 +1,35 @@
+# file: .github/workflows/ci.yml
+# version: 1.0.0
+# guid: c0c4ce11-0000-4000-8000-000000000001
+#
+# Thin caller of jdfalk/ghcommon/.github/workflows/reusable-ci.yml.
+# Repo-specific knobs live in .github/workflow-config.yaml. The action ref
+# below SHOULD be a pinned SHA in production — `@main` is the scaffold
+# default; the next CI run's pin-actions-to-hashes step will rewrite it.
+
+name: Continuous Integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  actions: write
+  checks: write
+  packages: write
+  id-token: write
+  attestations: write
+
+jobs:
+  ci:
+    name: Run CI
+    uses: jdfalk/ghcommon/.github/workflows/reusable-ci.yml@main
+    secrets: inherit

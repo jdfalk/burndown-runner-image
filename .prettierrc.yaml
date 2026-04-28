@@ -1,0 +1,13 @@
+# file: .prettierrc.yaml
+# version: 1.0.0
+# guid: 22222222-2222-4222-8222-222222222222
+
+printWidth: 100
+tabWidth: 2
+useTabs: false
+semi: true
+singleQuote: false
+trailingComma: es5
+bracketSpacing: true
+arrowParens: avoid
+proseWrap: always

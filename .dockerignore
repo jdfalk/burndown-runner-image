@@ -1,0 +1,11 @@
+# file: .dockerignore
+# version: 1.0.0
+# guid: f0c1ker0-0000-4000-8000-000000000002
+
+.git
+.github
+.vscode
+.idea
+node_modules
+*.log
+.DS_Store

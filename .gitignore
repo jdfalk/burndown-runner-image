@@ -1,0 +1,17 @@
+# file: .gitignore
+# version: 1.0.0
+# guid: 0a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9
+
+# General
+.DS_Store
+*.log
+logs/
+dist/
+build/
+venv/
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+coverage*
+*.out

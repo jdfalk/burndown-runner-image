@@ -1,0 +1,7 @@
+# file: .flake8
+# version: 1.0.0
+# guid: 77777777-7777-4777-8777-777777777777
+
+[flake8]
+max-line-length = 100
+extend-ignore = E203,W503

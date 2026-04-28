@@ -1,0 +1,8 @@
+# file: .markdownlint.yaml
+# version: 1.0.0
+# guid: 44444444-4444-4444-8444-444444444444
+
+default: true
+MD013: false # line length
+MD029: style
+MD025: false # multiple H1 allowed in some docs

@@ -1,0 +1,12 @@
+# file: .yamllint.yml
+# version: 1.0.0
+# guid: 55555555-5555-4555-8555-555555555555
+
+extends: default
+rules:
+    line-length:
+        max: 120
+        level: warning
+    trailing-spaces: enable
+    truthy:
+        check-keys: false
