@@ -31,5 +31,5 @@ permissions:
 jobs:
   ci:
     name: Run CI
-    uses: jdfalk/ghcommon/.github/workflows/reusable-ci.yml@main
+    uses: jdfalk/ghcommon/.github/workflows/reusable-ci.yml@c46f978c3de2ddc839f6e8e47c4a1739d932623e # main
     secrets: inherit

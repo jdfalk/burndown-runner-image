@@ -20,5 +20,5 @@ permissions:
 
 jobs:
   security:
-    uses: jdfalk/ghcommon/.github/workflows/reusable-security.yml@main
+    uses: jdfalk/ghcommon/.github/workflows/reusable-security.yml@c46f978c3de2ddc839f6e8e47c4a1739d932623e # main
     secrets: inherit
