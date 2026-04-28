@@ -1,22 +1,19 @@
 # file: .github/workflows/build-image.yml
-# version: 2.0.0
+# version: 2.0.1
 # guid: f0c1ker0-0000-4000-8000-000000000003
-#
-# Thin caller of jdfalk/ghcommon's reusable-release workflow with
-# Docker-only build target. The reusable handles the full Docker pipeline
-# (QEMU, buildx, login, metadata, multi-arch build/push, attestation,
-# SBOM) so this file stays small and consistent with every other repo
-# that uses the same reusable.
 
 name: Build image
 
 on:
   push:
     branches: [main]
-    tags: ['v*']
-  schedule:
-    - cron: '0 9 * * 1' # Mondays 09:00 UTC — pick up base-image patches
-  workflow_dispatch: {}
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+concurrency:
+  group: build-image-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -27,8 +24,16 @@ permissions:
 jobs:
   release:
     name: Build + push image
-    uses: jdfalk/ghcommon/.github/workflows/reusable-release.yml@c46f978c3de2ddc839f6e8e47c4a1739d932623e # main
+    uses: jdfalk/ghcommon/.github/workflows/reusable-release.yml@c46f978c3de2ddc839f6e8e47c4a1739d932623e # latest
     with:
-      build-target: docker
+      release-type: 'auto'
+      prerelease: true
+      draft: false
       docker-enabled: true
+      go-enabled: false
+      python-enabled: false
+      rust-enabled: false
+      frontend-enabled: false
+      protobuf-enabled: false
+      build-target: 'docker'
     secrets: inherit
