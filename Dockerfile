@@ -1,5 +1,5 @@
 # file: Dockerfile
-# version: 1.1.0
+# version: 1.1.1
 # guid: f0c1ker0-0000-4000-8000-000000000001
 #
 # Extends a GitHub Actions-style Ubuntu base with the project's runtime
@@ -63,8 +63,8 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # --- Extra Python packages (system pip; image is a build/CI runner, not a multi-tenant host) ---
-RUN python3 -m pip install --no-cache-dir --break-system-packages --upgrade pip \
- && python3 -m pip install --no-cache-dir --break-system-packages "git+https://github.com/jdfalk/safe-ai-util-mcp@main"
+RUN python3 -m pip install --no-cache-dir --upgrade pip \
+ && python3 -m pip install --no-cache-dir "git+https://github.com/jdfalk/safe-ai-util-mcp@main"
 
 # --- safe-ai-util Rust binary ---
 # safe-ai-util-mcp's stdio server shells out to the Rust `safe-ai-util` binary
