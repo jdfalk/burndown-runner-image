@@ -1,5 +1,5 @@
 # file: Dockerfile
-# version: 1.0.1
+# version: 1.1.0
 # guid: f0c1ker0-0000-4000-8000-000000000001
 #
 # Extends a GitHub Actions-style Ubuntu base with the project's runtime
@@ -7,7 +7,7 @@
 # (set via the IMAGE_BASE build-arg in your CI). The named tag below is the
 # floor; CI should override with a digest for reproducibility.
 
-ARG IMAGE_BASE=ghcr.io/catthehacker/ubuntu:full-22.04
+ARG IMAGE_BASE=ubuntu:22.04
 FROM ${IMAGE_BASE}
 
 # Provenance labels — picked up by docker/metadata-action and by `gh
