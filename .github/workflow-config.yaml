@@ -11,7 +11,7 @@ build:
   node_versions: ['22']
   platforms: ['linux/amd64', 'linux/arm64']
   enable_protobuf: false
-  enable_docker: false
+  enable_docker: true
   enable_cross_compile: false
   enable_coverage: false
   enable_security_scan: true
