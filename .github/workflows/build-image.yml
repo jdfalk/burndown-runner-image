@@ -1,18 +1,12 @@
 # file: .github/workflows/build-image.yml
-# version: 1.0.0
+# version: 2.0.0
 # guid: f0c1ker0-0000-4000-8000-000000000003
 #
-# Build and publish a multi-arch container image to GHCR.
-#
-# Triggers:
-#   * push to main         → tag :sha-<short> + :latest
-#   * push of v* tag       → tag :<version> + :latest
-#   * weekly cron          → rebuild :latest from the same source so upstream
-#                            base-image patches roll in without a code commit
-#   * workflow_dispatch    → manual rebuild
-#
-# The image name follows ghcr.io/<owner>/<repo> by convention. Override via
-# the IMAGE_NAME repo variable if a different name is needed.
+# Thin caller of jdfalk/ghcommon's reusable-release workflow with
+# Docker-only build target. The reusable handles the full Docker pipeline
+# (QEMU, buildx, login, metadata, multi-arch build/push, attestation,
+# SBOM) so this file stays small and consistent with every other repo
+# that uses the same reusable.
 
 name: Build image
 
@@ -21,73 +15,21 @@ on:
     branches: [main]
     tags: ['v*']
   schedule:
-    - cron: '0 9 * * 1'  # Mondays 09:00 UTC
+    - cron: '0 9 * * 1' # Mondays 09:00 UTC — pick up base-image patches
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
   packages: write
   id-token: write
   attestations: write
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ vars.IMAGE_NAME || format('{0}/{1}', github.repository_owner, github.event.repository.name) }}
+  actions: write
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      # Action refs are SHA-pinned (sha_pinning_required=true on this repo's
-      # Actions permissions). Bump the SHAs deliberately; dependabot will
-      # propose updates as releases ship.
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
-
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
-
-      - name: Log in to GHCR
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata (tags, labels)
-        id: meta
-        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,format=short
-
-      - name: Build and push
-        id: build
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: true
-          sbom: true
-
-      - name: Attest provenance
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          subject-digest: ${{ steps.build.outputs.digest }}
-          push-to-registry: true
+  release:
+    name: Build + push image
+    uses: jdfalk/ghcommon/.github/workflows/reusable-release.yml@c46f978c3de2ddc839f6e8e47c4a1739d932623e # main
+    with:
+      build-target: docker
+      docker-enabled: true
+    secrets: inherit
