@@ -1,5 +1,5 @@
 # file: .github/workflows/build-image.yml
-# version: 2.0.1
+# version: 2.1.0
 # guid: f0c1ker0-0000-4000-8000-000000000003
 
 name: Build image
@@ -9,7 +9,7 @@ on:
     branches: [main]
     paths-ignore:
       - '**.md'
-  workflow_dispatch:
+      - 'docs/**'
 
 concurrency:
   group: build-image-${{ github.ref }}
@@ -29,11 +29,7 @@ jobs:
       release-type: 'auto'
       prerelease: true
       draft: false
-      docker-enabled: true
       go-enabled: false
-      python-enabled: false
-      rust-enabled: false
-      frontend-enabled: false
-      protobuf-enabled: false
+      docker-enabled: true
       build-target: 'docker'
     secrets: inherit
