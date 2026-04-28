@@ -1,5 +1,5 @@
 # file: Dockerfile
-# version: 1.0.0
+# version: 1.0.1
 # guid: f0c1ker0-0000-4000-8000-000000000001
 #
 # Extends a GitHub Actions-style Ubuntu base with the project's runtime
