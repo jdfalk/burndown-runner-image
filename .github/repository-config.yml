@@ -1,0 +1,51 @@
+# file: .github/repository-config.yml
+# version: 1.0.0
+# guid: c0fc0f1f-0000-4000-8000-000000000002
+
+repository:
+  name: burndown-runner-image
+  type: docker
+  primary_language: docker
+  visibility: public
+  description: 'Pre-baked GHA-style runner image for the overnight-burndown bot (gh CLI, Go, Python, safe-ai-util, safe-ai-util-mcp).'
+
+languages:
+  versions:
+    docker:
+      - '22.04'
+    rust:
+      - '1.85.0'
+    go:
+      - '1.25.0'
+    python:
+      - '3.10'
+
+build:
+  platforms:
+    - ubuntu-latest
+  docker:
+    enabled: true
+    image_name: burndown-runner-image
+    registry: ghcr.io
+    platforms:
+      - linux/amd64
+      - linux/arm64
+
+ci:
+  coverage:
+    threshold: 0
+    fail_on_drop: false
+  lint:
+    enabled: false # Dockerfile-only repo; super-linter is overkill
+
+release:
+  versioning:
+    default_branch_strategy:
+      main: patch
+
+packages:
+  registries:
+    github: true
+    pypi: false
+    npm: false
+    cargo: false
