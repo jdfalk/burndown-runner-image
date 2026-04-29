@@ -1,5 +1,5 @@
 # file: Dockerfile
-# version: 1.2.0
+# version: 1.2.1
 # guid: f0c1ker0-0000-4000-8000-000000000001
 #
 # Extends a GitHub Actions-style Ubuntu base with the project's runtime
@@ -66,7 +66,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # --- Rust toolchain via rustup (pinned) ---
-ARG RUST_VERSION=1.83.0
+ARG RUST_VERSION=1.85.0
 ENV CARGO_HOME=/usr/local/cargo \
     RUSTUP_HOME=/usr/local/rustup \
     PATH=/usr/local/cargo/bin:/usr/local/go/bin:/root/go/bin:$PATH
