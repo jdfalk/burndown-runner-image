@@ -1,5 +1,5 @@
 # file: Dockerfile
-# version: 1.1.1
+# version: 1.2.0
 # guid: f0c1ker0-0000-4000-8000-000000000001
 #
 # Extends a GitHub Actions-style Ubuntu base with the project's runtime
@@ -58,19 +58,30 @@ ENV PATH=/usr/local/go/bin:/root/go/bin:$PATH \
     GOPATH=/root/go
 
 # --- Extra apt packages ---
+# Note: cargo/rustc from apt on 22.04 are too old (~1.66) and can't parse
+# modern Cargo.toml manifests. Rust comes from rustup below instead.
 RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends cargo python3-pip python3-venv rustc \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        python3-pip python3-venv build-essential pkg-config libssl-dev \
  && rm -rf /var/lib/apt/lists/*
+
+# --- Rust toolchain via rustup (pinned) ---
+ARG RUST_VERSION=1.83.0
+ENV CARGO_HOME=/usr/local/cargo \
+    RUSTUP_HOME=/usr/local/rustup \
+    PATH=/usr/local/cargo/bin:/usr/local/go/bin:/root/go/bin:$PATH
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+      | sh -s -- -y --no-modify-path --profile minimal --default-toolchain ${RUST_VERSION}
 
 # --- Extra Python packages (system pip; image is a build/CI runner, not a multi-tenant host) ---
 RUN python3 -m pip install --no-cache-dir --upgrade pip \
  && python3 -m pip install --no-cache-dir "git+https://github.com/jdfalk/safe-ai-util-mcp@main"
 
 # --- safe-ai-util Rust binary ---
-# safe-ai-util-mcp's stdio server shells out to the Rust `safe-ai-util` binary
-# via COPILOT_AGENT_UTIL_BIN. We `cargo install` from the source repo so the
-# image is self-contained — building from source adds ~3-5 min to image build
-# time but keeps us off any release-asset naming scheme that may change.
+# safe-ai-util-mcp's stdio server shells out to the Rust `safe-ai-util`
+# binary via COPILOT_AGENT_UTIL_BIN. cargo install from source — adds
+# ~3-5 min to image build but keeps us off any release-asset naming
+# scheme that may change.
 ARG SAFE_AI_UTIL_REF=main
 RUN cargo install --git https://github.com/jdfalk/safe-ai-util.git --branch ${SAFE_AI_UTIL_REF} --root /usr/local
 ENV COPILOT_AGENT_UTIL_BIN=/usr/local/bin/safe-ai-util
