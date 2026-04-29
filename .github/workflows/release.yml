@@ -1,5 +1,5 @@
 # file: .github/workflows/release.yml
-# version: 2.2.0
+# version: 2.3.0
 # guid: f0c1ker0-0000-4000-8000-000000000003
 
 name: Build image
@@ -7,10 +7,17 @@ name: Build image
 on:
   push:
     branches: [main]
+    tags: ['v*']
     paths-ignore:
       - '**.md'
       - 'docs/**'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      stable:
+        description: 'Publish as stable release (not pre-release)'
+        required: false
+        default: 'false'
+        type: string
 
 concurrency:
   group: build-image-${{ github.ref }}
@@ -27,10 +34,11 @@ permissions:
 jobs:
   release:
     name: Build + push image
-    uses: jdfalk/ghcommon/.github/workflows/reusable-release.yml@9796749d08eccc90b20b23ab3a97af28a73a14a0 # latest
+    uses: jdfalk/ghcommon/.github/workflows/reusable-release.yml@ed36e5bb1774a3593d741555a7584ca260a18720 # fix GH_TOKEN + env-bridge guard
     with:
       release-type: 'auto'
-      prerelease: true
+      prerelease: ${{ !startsWith(github.ref, 'refs/tags/v') && inputs.stable != 'true' }}
+      stable: ${{ startsWith(github.ref, 'refs/tags/v') || inputs.stable == 'true' }}
       draft: false
       docker-enabled: true
       build-target: 'docker'
