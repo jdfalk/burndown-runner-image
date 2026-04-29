@@ -1,5 +1,5 @@
 # file: Dockerfile
-# version: 1.2.2
+# version: 1.3.0
 # guid: f0c1ker0-0000-4000-8000-000000000001
 #
 # Extends a GitHub Actions-style Ubuntu base with the project's runtime
@@ -57,25 +57,38 @@ RUN set -eux; \
 ENV PATH=/usr/local/go/bin:/root/go/bin:$PATH \
     GOPATH=/root/go
 
-# --- Extra apt packages ---
-# Note: cargo/rustc from apt on 22.04 are too old (~1.66) and can't parse
-# modern Cargo.toml manifests. Rust comes from rustup below instead.
+# --- Build deps (no apt-installed Python — uv manages it below) ---
+# apt's cargo/rustc on 22.04 are too old (~1.66) and can't parse modern
+# Cargo.toml manifests; Rust comes from rustup below.
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        python3-pip python3-venv build-essential pkg-config libssl-dev \
+        build-essential pkg-config libssl-dev \
  && rm -rf /var/lib/apt/lists/*
 
 # --- Rust toolchain via rustup (pinned) ---
 ARG RUST_VERSION=1.88.0
 ENV CARGO_HOME=/usr/local/cargo \
-    RUSTUP_HOME=/usr/local/rustup \
-    PATH=/usr/local/cargo/bin:/usr/local/go/bin:/root/go/bin:$PATH
+    RUSTUP_HOME=/usr/local/rustup
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
       | sh -s -- -y --no-modify-path --profile minimal --default-toolchain ${RUST_VERSION}
 
-# --- Extra Python packages (system pip; image is a build/CI runner, not a multi-tenant host) ---
-RUN python3 -m pip install --no-cache-dir --upgrade pip \
- && python3 -m pip install --no-cache-dir "git+https://github.com/jdfalk/safe-ai-util-mcp@main"
+# --- Python via uv (single static binary; bundles its own Python builds) ---
+# uv installs an interpreter into /opt/python and creates a system venv at
+# /opt/venv that we put on PATH. This avoids ubuntu:22.04's stale Python
+# 3.10 (which doesn't support --break-system-packages) and gives every
+# Python script in the image consistent access to deps installed via
+# `uv pip install`. The venv approach also sidesteps PEP 668 entirely.
+ARG PYTHON_VERSION=3.13
+ENV UV_INSTALL_DIR=/usr/local/bin \
+    UV_PYTHON_INSTALL_DIR=/opt/python \
+    VIRTUAL_ENV=/opt/venv \
+    PATH=/opt/venv/bin:/usr/local/cargo/bin:/usr/local/go/bin:/root/go/bin:$PATH
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+ && uv python install ${PYTHON_VERSION} \
+ && uv venv --python ${PYTHON_VERSION} ${VIRTUAL_ENV} \
+ && uv pip install --python ${VIRTUAL_ENV}/bin/python \
+        pyyaml \
+        "git+https://github.com/jdfalk/safe-ai-util-mcp@main"
 
 # --- safe-ai-util Rust binary ---
 # safe-ai-util-mcp's stdio server shells out to the Rust `safe-ai-util`
@@ -91,6 +104,7 @@ RUN set -eux; \
     gh --version >/dev/null; \
     go version >/dev/null; \
     python3 --version >/dev/null; \
+    python3 -c 'import yaml; print("pyyaml", yaml.__version__)'; \
     safe-ai-util --version >/dev/null; \
     safe-ai-util-mcp --help >/dev/null 2>&1 || true
 
