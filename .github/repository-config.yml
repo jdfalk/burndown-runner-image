@@ -1,5 +1,5 @@
 # file: .github/repository-config.yml
-# version: 1.0.0
+# version: 1.1.0
 # guid: c0fc0f1f-0000-4000-8000-000000000002
 
 repository:
@@ -45,7 +45,7 @@ release:
 
 packages:
   registries:
-    github: true
+    github: false  # Docker image published to GHCR directly; no generic artifact tarballs
     pypi: false
     npm: false
     cargo: false
