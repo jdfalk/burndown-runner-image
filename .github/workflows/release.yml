@@ -1,5 +1,5 @@
 # file: .github/workflows/release.yml
-# version: 2.4.2
+# version: 2.5.0
 # guid: f0c1ker0-0000-4000-8000-000000000003
 
 name: Build image
@@ -104,22 +104,30 @@ jobs:
           BRANCH="chore/burndown-image-${OB_TAG}"
           git checkout -b "${BRANCH}"
 
-          # Replace every pinned image SHA in reusable-burndown.yml with the new ob- tag
-          sed -i "s|burndown-runner-image:[a-zA-Z0-9_.-]*|burndown-runner-image:${OB_TAG}|g" \
+          # Replace every pinned image SHA in every reusable workflow that
+          # embeds a burndown-runner-image tag with the new ob- tag. Keep
+          # this file list in sync with any new reusable-*.yml that pins
+          # the image — a workflow left off this list will silently drift
+          # to a stale/nonexistent tag on the next image release.
+          PINNED_FILES=(
             .github/workflows/reusable-burndown.yml
+            .github/workflows/reusable-triage-poll.yml
+          )
+          sed -i "s|burndown-runner-image:[a-zA-Z0-9_.-]*|burndown-runner-image:${OB_TAG}|g" \
+            "${PINNED_FILES[@]}"
 
-          git diff --exit-code .github/workflows/reusable-burndown.yml && {
-            echo "No changes needed — reusable-burndown.yml already uses ${OB_TAG}"
+          git diff --exit-code "${PINNED_FILES[@]}" && {
+            echo "No changes needed — pinned workflows already use ${OB_TAG}"
             exit 0
           }
 
           # Evaluate the diff: auto-merge only if every changed line is an
           # image-tag replacement. Any unexpected change → open for review.
-          UNEXPECTED=$(git diff --unified=0 .github/workflows/reusable-burndown.yml \
+          UNEXPECTED=$(git diff --unified=0 "${PINNED_FILES[@]}" \
             | grep "^[+-]" \
             | grep -v "^---\|^+++" \
             | grep -v "burndown-runner-image:" || true)
-          LINES_CHANGED=$(git diff --shortstat .github/workflows/reusable-burndown.yml \
+          LINES_CHANGED=$(git diff --shortstat "${PINNED_FILES[@]}" \
             | grep -oE '[0-9]+' | awk '{s+=$1} END {print s+0}')
 
           if [ -n "$UNEXPECTED" ] || [ "${LINES_CHANGED}" -gt 20 ]; then
@@ -130,7 +138,7 @@ jobs:
             HOLD_REASON=""
           fi
 
-          git add .github/workflows/reusable-burndown.yml
+          git add "${PINNED_FILES[@]}"
           git commit -m "chore: update burndown-runner-image to ${OB_TAG}"
           git push origin "${BRANCH}"
 
