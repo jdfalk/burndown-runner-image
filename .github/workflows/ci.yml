@@ -31,5 +31,5 @@ permissions:
 jobs:
   ci:
     name: Run CI
-    uses: falkcorp/github-common/.github/workflows/reusable-ci.yml@bfb912c850effd1ae9aded26d14856a538d3e5fc # main
+    uses: falkcorp/github-common/.github/workflows/reusable-ci.yml@d0c3326b96557c8ea9117c1c196b628e5e028186 # main
     secrets: inherit
